@@ -35,19 +35,18 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         PublicSaleStart
     }
 
-    //Counters.Counter private _tokenIds;
-
     string public PROVENANCE = "";
     string private _baseURIextended = "";
 
     uint constant public MAX_GHOSTLYS = 8888;
+    uint constant public MAX_MINT = 20;
     uint constant public GHOSTLYS_PRICE = 50 ether;
 
     uint public presaleStartTime = 2547586402; // default to some time far in the future
     uint public publicSaleStartTime = presaleStartTime + 24 hours; // starts 24 hours after the presale
 
     mapping(address => bool) private isTeam;
-    mapping(address => uint) public skullysBal;
+    mapping(address => uint) public freeMints;
 
     // Team Addresses
     address[] private _team = [
@@ -81,17 +80,17 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     }
 
     modifier verifyFreeMint(address _to) {
-        require(skullysBal[_to] > 0, "Must have a skully before snapshot for free mint");
+        require(freeMints[_to] > 0, "Must have a skully before snapshot for free mint");
         require(getStatus() == Status.PresaleStart || getStatus() == Status.PublicSaleStart, "Minting has not started");
         require(totalSupply() < MAX_GHOSTLYS, "Sold out");
         _;
     }
 
-    modifier verifyMint(address _to) {
+    modifier verifyMint(address _to, uint _amount) {
+        require(_amount < MAX_MINT, "Tried to mint too many at once");
         require(getStatus() == Status.PublicSaleStart, "Public sale has not started");
-        require(GHOSTLYS_PRICE <= msg.value, "Didn't send enough payment");
-        require(totalSupply() < MAX_GHOSTLYS, "Sold out");
-        require(totalSupply().add(1) <= MAX_GHOSTLYS, "Purchase would exceed max supply");
+        require(GHOSTLYS_PRICE * _amount <= msg.value, "Didn't send enough payment");
+        require(totalSupply().add(_amount) <= MAX_GHOSTLYS, "Purchase would exceed max supply");
         _;
     }
 
@@ -110,7 +109,7 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     function setManyWhiteList(address[] memory _addr, uint[] memory _bals) external onlyTeam {
         require(_addr.length == _bals.length, "Addresses and balances must have same array length");
         for(uint i = 0; i < _addr.length; i++){
-            skullysBal[_addr[i]] =_bals[i];
+            freeMints[_addr[i]] = _bals[i];
         }
     }
 
@@ -134,8 +133,6 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         uint mintId = totalSupply() + 1;
 
         _safeMint(_to, mintId);
-
-        emit GhostlyMinted(mintId, _to);
     }
 
     function mintFreeGhostly() external verifyFreeMint(msg.sender) {
@@ -145,20 +142,19 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
 
         _safeMint(_to, mintId);
 
-        skullysBal[_to]--;
-        emit GhostlyMinted(mintId, _to);
+        freeMints[_to]--;
     }
 
-    function mintGhostly() external payable verifyMint(msg.sender) {
+    function mintGhostly(uint _amount) external payable verifyMint(msg.sender, _amount) {
         address _to = msg.sender;
 
-        //_tokenIds.increment();
-        uint mintId = totalSupply() + 1;
+        for (uint i = 0; i < _amount; i++) {
+            uint mintId = totalSupply() + 1;
 
-        _safeMint(_to, mintId);
+            _safeMint(_to, mintId);
+        }
         payable(_team[0]).transfer(msg.value.sub(msg.value.div(4)));  // team member 0 gets 75% of mint revenue
         payable(_team[1]).transfer(msg.value.div(4));                 // team member 1 gets 25% of mint revenue
-        emit GhostlyMinted(mintId, _to);
     }
 
     function totalSupply() public view override(ERC721Enumerable) returns (uint256) {
@@ -190,8 +186,6 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
 
     // ensure this contract can receive payments (royalties)
     receive () external payable {}
-
-    event GhostlyMinted(uint _id, address _address);
 }
 /**
 
