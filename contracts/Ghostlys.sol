@@ -13,19 +13,21 @@ pragma solidity 0.8.7;
                                                                 ▀
 **/
 
-import "@openzeppelin/contracts/utils/Counters.sol";
+//import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "./ERC2981.sol";
 
+import "hardhat/console.sol";
+
 
 contract Ghostlys is ERC721Enumerable, ERC2981 {
 
     using SafeMath for uint;
     using SafeMath for uint256;
-    using Counters for Counters.Counter;
+    //using Counters for Counters.Counter;
 
     enum Status {
         Closed,
@@ -33,7 +35,7 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         PublicSaleStart
     }
 
-    Counters.Counter private _tokenIds;
+    //Counters.Counter private _tokenIds;
 
     string public PROVENANCE = "";
     string private _baseURIextended = "";
@@ -78,9 +80,9 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         _;
     }
 
-    modifier verifyFreeMint(address _to, ) {
-        require(skullysBal[_to] > 0 || isTeam[_to], "Must have a skully before snapshot for free mint");
-        require(getStatus() == Status.PresaleStart || getStatus() == Status.PublicSaleStart || isTeam[msg.sender], "Minting has not started");
+    modifier verifyFreeMint(address _to) {
+        require(skullysBal[_to] > 0, "Must have a skully before snapshot for free mint");
+        require(getStatus() == Status.PresaleStart || getStatus() == Status.PublicSaleStart, "Minting has not started");
         require(totalSupply() < MAX_GHOSTLYS, "Sold out");
         _;
     }
@@ -108,7 +110,7 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     function setManyWhiteList(address[] memory _addr, uint[] memory _bals) external onlyTeam {
         require(_addr.length == _bals.length, "Addresses and balances must have same array length");
         for(uint i = 0; i < _addr.length; i++){
-            skullysBals[_addr[i]] =_bals[i];
+            skullysBal[_addr[i]] =_bals[i];
         }
     }
 
@@ -126,11 +128,20 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         publicSaleStartTime = _newTime + 24 hours;
     }
 
+    function teamMint() external onlyTeam {
+        address _to = msg.sender;
+
+        uint mintId = totalSupply() + 1;
+
+        _safeMint(_to, mintId);
+
+        emit GhostlyMinted(mintId, _to);
+    }
+
     function mintFreeGhostly() external verifyFreeMint(msg.sender) {
         address _to = msg.sender;
 
-        _tokenIds.increment();
-        uint mintId = _tokenIds.current();
+        uint mintId = totalSupply() + 1;
 
         _safeMint(_to, mintId);
 
@@ -141,8 +152,8 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     function mintGhostly() external payable verifyMint(msg.sender) {
         address _to = msg.sender;
 
-        _tokenIds.increment();
-        uint mintId = _tokenIds.current();
+        //_tokenIds.increment();
+        uint mintId = totalSupply() + 1;
 
         _safeMint(_to, mintId);
         payable(_team[0]).transfer(msg.value.sub(msg.value.div(4)));  // team member 0 gets 75% of mint revenue
