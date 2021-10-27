@@ -22,7 +22,7 @@ module.exports = {
   networks: {
     hardhat: {
       accounts: {
-        count: 500,
+        count: 444,
         accountsBalance: "1000000000000000000000000"  // 10000 ETH
       }
     }

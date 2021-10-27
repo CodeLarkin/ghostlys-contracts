@@ -57,36 +57,32 @@ describe("Full mint test harness for Ghostlys", function () {
         const wallets = await ethers.getSigners()
         const numWallets = wallets.length
         const MAX_GHOSTLYS = await this.ghostlys.MAX_GHOSTLYS()
-        const ghostlysPerWallet = Math.floor(MAX_GHOSTLYS / (numWallets - 1))
+        const MAX_MINT = 20
+        const ghostlysPerWallet = MAX_MINT
         console.log(`\tUsing ${numWallets} wallets to mint ghostlys (${ghostlysPerWallet}) per wallet`)
 
         await startPublicSaleNow(this.provider, this.ghostlys)
-        //await this.ghostlys.connect(this.alice).setManyWhiteList([this.bobby.address, this.carly.address])
-        //await this.ghostlys.connect(this.bobby).mintFreeGhostly()
 
         // Every wallet mints some ghostlys
         let mintCount = 0
         let mintPromises = new Array()
-        for (let w = 1; w < numWallets; w++) {
-            mintPromises.push(new Array())
-            for (let s = 0; s < ghostlysPerWallet; s++) {
-                mintPromises[w-1].push(this.ghostlys.connect(wallets[w]).mintGhostly({ value: COST }))
-                mintCount++
-            }
+        for (let w = 0; w < numWallets; w++) {
+            mintPromises.push(this.ghostlys.connect(wallets[w]).mintGhostly(MAX_MINT, { value: COST.mul(MAX_MINT) }))
+            mintCount++
+            console.log(`Wallet ${w + 1}/444 is minting...`)
         }
         // We didn't wait for one mint to finish before calling the next
         // Now we wait for all of them to complete
-        for (let w = 1; w < numWallets; w++) {
-            for (let s = 0; s < ghostlysPerWallet; s++) {
-                await mintPromises[w-1][s]
-            }
+        for (let w = 0; w < numWallets; w++) {
+            await mintPromises[w]
+            console.log(`Wallet ${w + 1}/444's mint was confirmed...`)
         }
         let supplyLeft = MAX_GHOSTLYS - await this.ghostlys.totalSupply()
         console.log(`Supply Left: ${supplyLeft}`)
         console.log("Minting the rest...")
         console.log("Wallet 1 Balance: ", (await this.provider.getBalance(wallets[1].address)).toString())
         for (let s = 0; s < supplyLeft; s++) {
-            await this.ghostlys.connect(wallets[1]).mintGhostly({ value: COST })
+            await this.ghostlys.connect(wallets[1]).mintGhostly(1, { value: COST })
             mintCount++
         }
         const finalSupply = await this.ghostlys.totalSupply()
@@ -98,7 +94,7 @@ describe("Full mint test harness for Ghostlys", function () {
         expect(finalSupply).to.equal(MAX_GHOSTLYS)
 
         await expectRevert(
-            this.ghostlys.connect(wallets[1]).mintGhostly({ value: COST }),
+            this.ghostlys.connect(wallets[1]).mintGhostly(1, { value: COST }),
             "Sold out"
         )
 
@@ -111,24 +107,6 @@ describe("Full mint test harness for Ghostlys", function () {
         let totalCost = COST.mul(MAX_GHOSTLYS)
         expect(artEarned).to.equal(totalCost.sub(totalCost.div(4)))
         expect(devEarned).to.equal(totalCost.div(4))
-
-        // get original balances of the special token owners to subtract later
-        // after withdrawal of royalties from the contract address
-        await this.alice.sendTransaction({ to: this.ghostlys.address, value: COST })
-        let ghostlysBal = await this.provider.getBalance(this.ghostlys.address)
-        expect(ghostlysBal).to.equal(COST)
-
-        // alice triggers the withrawAll function which distributes the contract balance back to the team, etc
-        await this.ghostlys.connect(this.alice).withdrawAll()
-        ghostlysBal = await this.provider.getBalance(this.ghostlys.address)
-
-        // make sure artist and dev have appropriate amounts
-        let artBal = (await this.provider.getBalance(artist)).sub(artBalAfterMint)
-        let devBal = (await this.provider.getBalance(dev)).sub(devBalAfterMint)
-        // artist    gets 75% of 8888 * 50
-        expect(artBal).to.equal(BigNumber.from(ethers.utils.parseEther("333300")))
-        // dev       gets 25% of 8888 * 50
-        expect(devBal).to.equal(BigNumber.from(ethers.utils.parseEther("111100")))
     });
 
 });

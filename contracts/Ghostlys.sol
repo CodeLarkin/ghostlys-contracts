@@ -87,10 +87,10 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     }
 
     modifier verifyMint(address _to, uint _amount) {
-        require(_amount < MAX_MINT, "Tried to mint too many at once");
+        require(_amount <= MAX_MINT, "Tried to mint too many at once");
         require(getStatus() == Status.PublicSaleStart, "Public sale has not started");
         require(GHOSTLYS_PRICE * _amount <= msg.value, "Didn't send enough payment");
-        require(totalSupply().add(_amount) <= MAX_GHOSTLYS, "Purchase would exceed max supply");
+        require(totalSupply().add(_amount) <= MAX_GHOSTLYS, "Sold out");
         _;
     }
 
