@@ -198,6 +198,17 @@ describe("Test harness for Ghostlys", function () {
         expect(await this.ghostlys.balanceOf(this.bobby.address)).to.equal(BigNumber.from(10))
     });
 
+    it("Can't mint >20", async function () {
+        await startPublicSaleNow(this.provider, this.ghostlys)
+
+        await expectRevert(
+            this.ghostlys.connect(this.bobby).mintGhostly(21, { value: COST.mul(21) }),
+            "Tried to mint too many at once"
+        )
+
+        expect(await this.ghostlys.balanceOf(this.bobby.address)).to.equal(BigNumber.from(0))
+    });
+
     it("In public-sale, can mint Ghostlys (multiple) whether whitelisted or not", async function () {
         let initArtBal = await this.provider.getBalance(artist);
         let initDevBal = await this.provider.getBalance(dev);
