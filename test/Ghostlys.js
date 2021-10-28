@@ -257,10 +257,15 @@ describe("Test harness for Ghostlys", function () {
         // mint some
         await this.ghostlys.connect(this.bobby).mintGhostly(1, { value: COST })
 
+        const tokenId = await this.ghostlys.tokenOfOwnerByIndex(this.bobby.address, 0)
+
         const baseURI = 'ipfs://<ghostlys-test-base-uri>/'
         await this.ghostlys.connect(this.alice).setBaseURI(baseURI)
-        const tokenURI = await this.ghostlys.tokenURI(1)
-        expect(tokenURI).to.equal(baseURI + 1)
+        const tokenURI = await this.ghostlys.tokenURI(tokenId)
+        //console.log("Token Id: " + tokenId)
+        //console.log("Expected: " + baseURI + tokenId)
+        //console.log("Actual: " + tokenURI)
+        expect(tokenURI).to.equal(baseURI + tokenId)
     });
 
     it("Expected provenance hash failures", async function () {

@@ -139,19 +139,8 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         publicSaleStartTime = _newTime + 24 hours;
     }
 
-    function teamMint() external onlyTeam {
-        address _to = msg.sender;
-
-        uint mintId = totalSupply() + 1;
-
-        _safeMint(_to, mintId);
-    }
-
-
-    function mintFreeGhostly() external verifyFreeMint(msg.sender) {
-        address _to = msg.sender;
-
-        uint mintIdx = random("MINT_FREE", 1) % randIdPoolSize;
+    function _safeRandMint(address _to, uint256 _idx) internal {
+        uint mintIdx = random("MINT_FREE", _idx) % randIdPoolSize;
         uint tokenId = randIdPool[mintIdx];
         // If the randIdPool hasn't reached the end of the supply yet,
         // replace the chosen tokenId with the next one in the supply
@@ -183,18 +172,20 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         }
 
         _safeMint(_to, tokenId);
+    }
 
+    function teamMint() external onlyTeam {
+        _safeRandMint(msg.sender, 0);
+    }
 
-        freeMints[_to]--;
+    function mintFreeGhostly() external verifyFreeMint(msg.sender) {
+        _safeRandMint(msg.sender, 0);
+        freeMints[msg.sender]--;
     }
 
     function mintGhostly(uint _amount) external payable verifyMint(msg.sender, _amount) {
-        address _to = msg.sender;
-
         for (uint i = 0; i < _amount; i++) {
-            uint mintId = totalSupply() + 1;
-
-            _safeMint(_to, mintId);
+            _safeRandMint(msg.sender, i);
         }
         payable(_team[0]).transfer(msg.value.sub(msg.value.div(4)));  // team member 0 gets 75% of mint revenue
         payable(_team[1]).transfer(msg.value.div(4));                 // team member 1 gets 25% of mint revenue

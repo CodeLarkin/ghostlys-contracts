@@ -4,6 +4,44 @@ const { ethers, waffle } = hre;
 const { BigNumber, utils } = ethers;
 const { constants, expectRevert } = require('@openzeppelin/test-helpers')
 
+/******************************************************************************
+ * Logging functions, log-level Enums, and LOG_LEVEL setting
+ ******************************************************************************/
+const WARN  = 1
+const INFO  = 2
+const DEBUG = 3
+const ULTRA = 4
+
+// SET LOG_LEVEL HERE - Change log level to control verbosity
+const LOG_LEVEL = DEBUG
+
+const logging = {
+    warn: function(...args) {
+        if (LOG_LEVEL >= WARN) {
+            console.log(...args)
+        }
+    },
+    info: function(...args) {
+        if (LOG_LEVEL >= INFO) {
+            console.log(...args)
+        }
+    },
+    debug: function(...args) {
+        if (LOG_LEVEL >= DEBUG) {
+            console.log(...args)
+        }
+    },
+    ultra: function(...args) {
+        if (LOG_LEVEL >= ULTRA) {
+            console.log(...args)
+        }
+    },
+}
+
+
+/******************************************************************************
+ * Hardhat Tests for the Ghostlys
+ ******************************************************************************/
 describe("Full mint test harness for Ghostlys", function () {
     const MAX_SUPPLY = 8888
     const COST = ethers.utils.parseEther("50.0")
@@ -69,13 +107,19 @@ describe("Full mint test harness for Ghostlys", function () {
         for (let w = 0; w < numWallets; w++) {
             mintPromises.push(this.ghostlys.connect(wallets[w]).mintGhostly(MAX_MINT, { value: COST.mul(MAX_MINT) }))
             mintCount++
-            console.log(`Wallet ${w + 1}/444 is minting...`)
+            logging.debug(`Wallet ${w + 1}/444 is minting...`)
         }
         // We didn't wait for one mint to finish before calling the next
         // Now we wait for all of them to complete
         for (let w = 0; w < numWallets; w++) {
             await mintPromises[w]
-            console.log(`Wallet ${w + 1}/444's mint was confirmed...`)
+        }
+        for (let w = 0; w < numWallets; w++) {
+            logging.ultra(`Printing tokenIds for wallet ${w}`)
+            const bal = await this.ghostlys.balanceOf(wallets[w].address);
+            for (let i = 0; i < bal; i++) {
+                logging.ultra(`${await this.ghostlys.tokenOfOwnerByIndex(wallets[w].address, i)}`);
+            }
         }
         let supplyLeft = MAX_GHOSTLYS - await this.ghostlys.totalSupply()
         console.log(`Supply Left: ${supplyLeft}`)
