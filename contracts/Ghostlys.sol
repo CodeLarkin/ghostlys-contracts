@@ -45,6 +45,11 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     uint public presaleStartTime = 2547586402; // default to some time far in the future
     uint public publicSaleStartTime = presaleStartTime + 24 hours; // starts 24 hours after the presale
 
+    uint constant private RAND_ID_POOL_SIZE = 100;
+    uint private randIdPoolSize = RAND_ID_POOL_SIZE;
+    uint[RAND_ID_POOL_SIZE] private randIdPool;
+    //uint[] private ;
+
     mapping(address => bool) private isTeam;
     mapping(address => uint) public freeMints;
 
@@ -72,6 +77,13 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
 
         _setReceiver(address(this));
         _setRoyaltyPercentage(ROYALTIES_PERCENTAGE);
+
+        for (uint i = 0; i < RAND_ID_POOL_SIZE; i++) {
+            randIdPool[i] = i+1;
+        }
+        // initialize tokenIdsLeft to range(1, 100)
+        // choose a random index into tokenIdsLeft, mint that ID
+        // delete that ID from tokenIdsLeft, add totalSupply() + 1 to tokenIdsLeft
     }
 
     modifier onlyTeam() {
@@ -135,12 +147,43 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         _safeMint(_to, mintId);
     }
 
+
     function mintFreeGhostly() external verifyFreeMint(msg.sender) {
         address _to = msg.sender;
 
-        uint mintId = totalSupply() + 1;
+        uint mintIdx = random("MINT_FREE", 1) % randIdPoolSize;
+        uint tokenId = randIdPool[mintIdx];
+        // If the randIdPool hasn't reached the end of the supply yet,
+        // replace the chosen tokenId with the next one in the supply
+        // Example:
+        //     RAND_ID_POOL_SIZE=100
+        //     randIdPool is initialized to just an enumerated list from 1 to 100 inclusive
+        //     For the first mint, say the random index 20 is chosen, which corresponds to tokenId 20 in randIdPool (since it is initialized as just 1 to 100)
+        //     Since we are nowhere near the end of the supply yet on this first iteration,
+        //     index 20 in randIdPool is replaced with the next unminted tokenId that has been
+        //     outside of the randIdPool thus far: 101
+        //     Mint is completed, and next time, if index 20 is randomly chosen, it will be tokenId 101
+        // Edge case:
+        //     Once mints near the end of the max supply, begin decremeting the size of the randIdPool
+        //     Instead of just replacing the tokenId being currently claimed wtih
+        //     the next one outside the pool, just replace it wiht the last ID in the pool.
+        //     If it IS the last ID in the pool, replace with the second-to-last
+        //     If this is the last token in the supply, skip all of this and just mint
+        if (totalSupply().add(1) < MAX_GHOSTLYS) {
+            if (MAX_GHOSTLYS.sub(totalSupply()) >= RAND_ID_POOL_SIZE) {
+                randIdPool[mintIdx] = totalSupply().add(RAND_ID_POOL_SIZE).add(1);
+            } else {
+                randIdPoolSize = randIdPoolSize.sub(1);
+                if (randIdPool[mintIdx] == randIdPool[randIdPoolSize]) {
+                    randIdPool[mintIdx] = randIdPool[randIdPoolSize.sub(1)];
+                } else {
+                    randIdPool[mintIdx] = randIdPool[randIdPoolSize];
+                }
+            }
+        }
 
-        _safeMint(_to, mintId);
+        _safeMint(_to, tokenId);
+
 
         freeMints[_to]--;
     }
@@ -186,6 +229,37 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
 
     // ensure this contract can receive payments (royalties)
     receive () external payable {}
+
+    /**************************************************************************
+     * Helper functions
+     **************************************************************************/
+    function random(string memory _tag, uint256 _int0) internal view returns (uint256) {
+        return uint256(keccak256(abi.encodePacked(_tag, toString(_int0), toString(block.timestamp), msg.sender)));
+    }
+
+    function toString(uint256 value) internal pure returns (string memory) {
+    // Inspired by OraclizeAPI's implementation - MIT license
+    // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol
+
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+    /* End helper functions
+     **************************************************************************/
 }
 /**
 

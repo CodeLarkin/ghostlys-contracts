@@ -62,7 +62,12 @@ describe("Test harness for Ghostlys", function () {
         this.owner1.connect(this.provider)
 
         // Deploy Ghostlys
-        this.ghostlys = await this.Ghostlys.connect(this.alice).deploy()
+        // let gasEst = await this.Ghostlys.interface.encodeDeploy([])
+        //console.log("Gas estimate: " + await ethers.providers.estimateGas({ data: gasEst }))
+        const GAS_LIMIT = 30000000
+        const GAS_PRICE = ethers.utils.parseUnits("1500", "gwei")
+        this.ghostlys = await this.Ghostlys.connect(this.alice).deploy({ gasLimit: GAS_LIMIT, gasPrice: GAS_PRICE })
+        //this.ghostlys = await this.Ghostlys.connect(this.alice).deploy()
         await this.ghostlys.deployed()
     });
 
