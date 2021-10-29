@@ -129,7 +129,7 @@ describe("Test harness for Ghostlys", function () {
         expect(status).to.equal(0)  // 0 is the enum Status.Closed
 
         await expectRevert(
-            this.ghostlys.connect(this.bobby).mintFreeGhostly(),
+            this.ghostlys.connect(this.bobby).mintFreeGhostlys(),
              "Must have a skully before snapshot for free mint"
         )
         await this.ghostlys.connect(this.alice).teamMint()
@@ -143,7 +143,7 @@ describe("Test harness for Ghostlys", function () {
         expect(status).to.equal(1)  // 1 is the enum Status.PresaleStart
 
         await expectRevert(
-            this.ghostlys.connect(this.bobby).mintFreeGhostly(),
+            this.ghostlys.connect(this.bobby).mintFreeGhostlys(),
              "Must have a skully before snapshot for free mint"
         )
 
@@ -155,7 +155,7 @@ describe("Test harness for Ghostlys", function () {
         await startPreSaleNow(this.provider, this.ghostlys)
         await this.ghostlys.connect(this.alice).setManyWhiteList([this.bobby.address, this.carly.address], [1, 1])
 
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
+        await this.ghostlys.connect(this.bobby).mintFreeGhostlys()
         let bobbyBal = await this.ghostlys.balanceOf(this.bobby.address)
         expect(bobbyBal).to.equal(BigNumber.from(1))
     });
@@ -164,10 +164,9 @@ describe("Test harness for Ghostlys", function () {
         await startPreSaleNow(this.provider, this.ghostlys)
         await this.ghostlys.connect(this.alice).setManyWhiteList([this.bobby.address, this.carly.address], [2, 1])
 
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
+        await this.ghostlys.connect(this.bobby).mintFreeGhostlys()
         await expectRevert(
-            this.ghostlys.connect(this.bobby).mintFreeGhostly(),
+            this.ghostlys.connect(this.bobby).mintFreeGhostlys(),
             "Must have a skully before snapshot for free mint"
         )
         let bobbyBal = await this.ghostlys.balanceOf(this.bobby.address)
@@ -195,10 +194,7 @@ describe("Test harness for Ghostlys", function () {
         await this.ghostlys.connect(this.alice).setManyWhiteList([this.bobby.address, this.carly.address], [4, 1])
 
         // mint some
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
+        await this.ghostlys.connect(this.bobby).mintFreeGhostlys()
         await this.ghostlys.connect(this.bobby).mintGhostly(6, { value: COST.mul(6) })
         expect(await this.ghostlys.balanceOf(this.bobby.address)).to.equal(BigNumber.from(10))
     });
@@ -221,7 +217,7 @@ describe("Test harness for Ghostlys", function () {
         await this.ghostlys.connect(this.alice).setManyWhiteList([this.bobby.address, this.carly.address], [1, 1])
 
         // mint some
-        await this.ghostlys.connect(this.bobby).mintFreeGhostly()
+        await this.ghostlys.connect(this.bobby).mintFreeGhostlys()
         await this.ghostlys.connect(this.bobby).mintGhostly(1, { value: COST })
         await this.ghostlys.connect(this.dobby).mintGhostly(2, { value: COST.mul(2) })
         await this.ghostlys.connect(this.erkle).mintGhostly(1, { value: COST })

@@ -108,6 +108,11 @@ describe("Full mint test harness for Ghostlys", function () {
             mintPromises.push(this.ghostlys.connect(wallets[w]).mintGhostly(MAX_MINT, { value: COST.mul(MAX_MINT) }))
             mintCount++
             logging.debug(`Wallet ${w + 1}/444 is minting...`)
+
+            if (w % 10 == 0) {
+                await ethers.provider.send("evm_increaseTime", [10])
+                await ethers.provider.send("evm_mine", []) // force mine the next block
+            }
         }
         // We didn't wait for one mint to finish before calling the next
         // Now we wait for all of them to complete

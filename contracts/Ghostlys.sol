@@ -13,21 +13,17 @@ pragma solidity 0.8.7;
                                                                 ▀
 **/
 
-//import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "./ERC2981.sol";
 
-import "hardhat/console.sol";
-
 
 contract Ghostlys is ERC721Enumerable, ERC2981 {
 
     using SafeMath for uint;
     using SafeMath for uint256;
-    //using Counters for Counters.Counter;
 
     enum Status {
         Closed,
@@ -178,9 +174,13 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         _safeRandMint(msg.sender, 0);
     }
 
-    function mintFreeGhostly() external verifyFreeMint(msg.sender) {
-        _safeRandMint(msg.sender, 0);
-        freeMints[msg.sender]--;
+    function mintFreeGhostlys() external verifyFreeMint(msg.sender) {
+        // amount is the lesser of freeMints and remaining supply
+        uint _amount = freeMints[msg.sender] < MAX_GHOSTLYS - totalSupply() ? freeMints[msg.sender] : MAX_GHOSTLYS - totalSupply();
+        for (uint i = 0; i < _amount; i++) {
+            _safeRandMint(msg.sender, i);
+        }
+        freeMints[msg.sender] = 0;
     }
 
     function mintGhostly(uint _amount) external payable verifyMint(msg.sender, _amount) {
