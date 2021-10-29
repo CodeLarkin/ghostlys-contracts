@@ -214,7 +214,7 @@ describe("Test harness for Ghostlys", function () {
         let initArtBal = await this.provider.getBalance(artist);
         let initDevBal = await this.provider.getBalance(dev);
         await startPublicSaleNow(this.provider, this.ghostlys)
-        await this.ghostlys.connect(this.alice).setManyWhiteList([this.bobby.address, this.carly.address], [1, 1])
+        await this.ghostlys.connect(this.alice).setManyWhiteList([this.bobby.address, this.carly.address], [100, 1])
 
         // mint some
         await this.ghostlys.connect(this.bobby).mintFreeGhostlys()
@@ -226,7 +226,7 @@ describe("Test harness for Ghostlys", function () {
         let bobbyBal = await this.ghostlys.balanceOf(this.bobby.address)
         let dobbyBal = await this.ghostlys.balanceOf(this.dobby.address)
         let erkleBal = await this.ghostlys.balanceOf(this.erkle.address)
-        expect(bobbyBal).to.equal(BigNumber.from(2))
+        expect(bobbyBal).to.equal(BigNumber.from(101))
         expect(dobbyBal).to.equal(BigNumber.from(2))
         expect(erkleBal).to.equal(BigNumber.from(1))
 
