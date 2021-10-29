@@ -183,7 +183,7 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         freeMints[msg.sender] = 0;
     }
 
-    function mintGhostly(uint _amount) external payable verifyMint(msg.sender, _amount) {
+    function mintGhostlys(uint _amount) external payable verifyMint(msg.sender, _amount) {
         for (uint i = 0; i < _amount; i++) {
             _safeRandMint(msg.sender, i);
         }

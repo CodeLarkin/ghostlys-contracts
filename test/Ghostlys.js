@@ -177,12 +177,12 @@ describe("Test harness for Ghostlys", function () {
         await startPreSaleNow(this.provider, this.ghostlys)
         // Can't pay to mint in pre-sale if not whitelisted
         await expectRevert(
-            this.ghostlys.connect(this.bobby).mintGhostly(1, { value: COST }),
+            this.ghostlys.connect(this.bobby).mintGhostlys(1, { value: COST }),
             "Public sale has not started"
         )
         // Can't pay to mint in pre-sale even if whitelisted
         await expectRevert(
-            this.ghostlys.connect(this.bobby).mintGhostly(1, { value: COST }),
+            this.ghostlys.connect(this.bobby).mintGhostlys(1, { value: COST }),
             "Public sale has not started"
         )
         let bobbyBal = await this.ghostlys.balanceOf(this.bobby.address)
@@ -195,7 +195,7 @@ describe("Test harness for Ghostlys", function () {
 
         // mint some
         await this.ghostlys.connect(this.bobby).mintFreeGhostlys()
-        await this.ghostlys.connect(this.bobby).mintGhostly(6, { value: COST.mul(6) })
+        await this.ghostlys.connect(this.bobby).mintGhostlys(6, { value: COST.mul(6) })
         expect(await this.ghostlys.balanceOf(this.bobby.address)).to.equal(BigNumber.from(10))
     });
 
@@ -203,7 +203,7 @@ describe("Test harness for Ghostlys", function () {
         await startPublicSaleNow(this.provider, this.ghostlys)
 
         await expectRevert(
-            this.ghostlys.connect(this.bobby).mintGhostly(21, { value: COST.mul(21) }),
+            this.ghostlys.connect(this.bobby).mintGhostlys(21, { value: COST.mul(21) }),
             "Tried to mint too many at once"
         )
 
@@ -218,9 +218,9 @@ describe("Test harness for Ghostlys", function () {
 
         // mint some
         await this.ghostlys.connect(this.bobby).mintFreeGhostlys()
-        await this.ghostlys.connect(this.bobby).mintGhostly(1, { value: COST })
-        await this.ghostlys.connect(this.dobby).mintGhostly(2, { value: COST.mul(2) })
-        await this.ghostlys.connect(this.erkle).mintGhostly(1, { value: COST })
+        await this.ghostlys.connect(this.bobby).mintGhostlys(1, { value: COST })
+        await this.ghostlys.connect(this.dobby).mintGhostlys(2, { value: COST.mul(2) })
+        await this.ghostlys.connect(this.erkle).mintGhostlys(1, { value: COST })
 
         // check balances
         let bobbyBal = await this.ghostlys.balanceOf(this.bobby.address)
@@ -251,7 +251,7 @@ describe("Test harness for Ghostlys", function () {
         await startPublicSaleNow(this.provider, this.ghostlys)
 
         // mint some
-        await this.ghostlys.connect(this.bobby).mintGhostly(1, { value: COST })
+        await this.ghostlys.connect(this.bobby).mintGhostlys(1, { value: COST })
 
         const tokenId = await this.ghostlys.tokenOfOwnerByIndex(this.bobby.address, 0)
 

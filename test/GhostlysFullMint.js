@@ -105,7 +105,7 @@ describe("Full mint test harness for Ghostlys", function () {
         let mintCount = 0
         let mintPromises = new Array()
         for (let w = 0; w < numWallets; w++) {
-            mintPromises.push(this.ghostlys.connect(wallets[w]).mintGhostly(MAX_MINT, { value: COST.mul(MAX_MINT) }))
+            mintPromises.push(this.ghostlys.connect(wallets[w]).mintGhostlys(MAX_MINT, { value: COST.mul(MAX_MINT) }))
             mintCount++
             logging.debug(`Wallet ${w + 1}/444 is minting...`)
 
@@ -131,7 +131,7 @@ describe("Full mint test harness for Ghostlys", function () {
         console.log("Minting the rest...")
         console.log("Wallet 1 Balance: ", (await this.provider.getBalance(wallets[1].address)).toString())
         for (let s = 0; s < supplyLeft; s++) {
-            await this.ghostlys.connect(wallets[1]).mintGhostly(1, { value: COST })
+            await this.ghostlys.connect(wallets[1]).mintGhostlys(1, { value: COST })
             mintCount++
         }
         const finalSupply = await this.ghostlys.totalSupply()
@@ -143,7 +143,7 @@ describe("Full mint test harness for Ghostlys", function () {
         expect(finalSupply).to.equal(MAX_GHOSTLYS)
 
         await expectRevert(
-            this.ghostlys.connect(wallets[1]).mintGhostly(1, { value: COST }),
+            this.ghostlys.connect(wallets[1]).mintGhostlys(1, { value: COST }),
             "Sold out"
         )
 
