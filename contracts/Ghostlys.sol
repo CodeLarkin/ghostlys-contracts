@@ -38,7 +38,7 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     uint constant public MAX_MINT = 20;
     uint constant public GHOSTLYS_PRICE = 50 ether;
 
-    uint public presaleStartTime = 2547586402; // default to some time far in the future
+    uint public presaleStartTime = 1635624000; // default to some time far in the future
     uint public publicSaleStartTime = presaleStartTime + 24 hours; // starts 24 hours after the presale
 
     uint constant private RAND_ID_POOL_SIZE = 100;
