@@ -26,7 +26,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-
+// Adapted and simplified from first Fantomon HealingRift
 contract GhostlysRift is Ownable {
     using SafeMath for uint256;
 
