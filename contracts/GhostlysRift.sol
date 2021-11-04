@@ -187,7 +187,6 @@ contract GhostlysRift is Ownable {
     }
 }
 /**
-
  Art, Generative Art, UI: Funeral - @yolofinancial
  Solidity & React:        Larkin  - @CodeLarkin
  Communities: @farmgoddao, @SkullysNFT, @fantomonftm
