@@ -107,6 +107,10 @@ describe("GhostlyRift", function () {
         await this.nfts.connect(this.alice).mintGhostlys(1, { value: PRICE })
         const tokenId = await this.nfts.tokenOfOwnerByIndex(this.alice.address, 0)
         await expectRevert(
+            this.rift.connect(this.bobby).claimRewards(tokenId),
+             "You don't own that tokenId"
+        )
+        await expectRevert(
             this.rift.connect(this.bobby).enter(tokenId),
              "You don't own that tokenId"
         )
