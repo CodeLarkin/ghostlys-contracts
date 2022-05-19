@@ -44,20 +44,19 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
     uint constant private RAND_ID_POOL_SIZE = 100;
     uint private randIdPoolSize = RAND_ID_POOL_SIZE;
     uint[RAND_ID_POOL_SIZE] private randIdPool;
-    //uint[] private ;
 
     mapping(address => bool) private isTeam;
     mapping(address => uint) public freeMints;
 
     // Team Addresses
     address[] private _team = [
-        0xC87bf1972Dd048404CBd3FbA300b69277552C472, // 38 - FUNERAL - Art, Generative Art, UI, Community
-        0x14E8F54f35eE42Cdf436A19086659B34dA6D9D47, // 12 - LARKIN  - Dev
-        0xA4f7a42F2569f97de8218Aa875F58533Fe842FEe  // 50 - Community
+        0xC87bf1972Dd048404CBd3FbA300b69277552C472, // FUNERAL - Art, Generative Art, UI, Community
+        0x14E8F54f35eE42Cdf436A19086659B34dA6D9D47, // LARKIN  - Dev
+        0xA4f7a42F2569f97de8218Aa875F58533Fe842FEe  // Community
 
     ];
 
-    // team address and community wallet payout shares
+    // ROYALTIES - team address and community wallet payout shares
     uint256[] private _team_shares = [38, 12, 50];  // 38 and 12 for team, and then 50% for community wallet
 
 
@@ -74,12 +73,10 @@ contract Ghostlys is ERC721Enumerable, ERC2981 {
         _setReceiver(address(this));
         _setRoyaltyPercentage(ROYALTIES_PERCENTAGE);
 
+        // initialize random ID pool to range(1, 100)
         for (uint i = 0; i < RAND_ID_POOL_SIZE; i++) {
             randIdPool[i] = i+1;
         }
-        // initialize tokenIdsLeft to range(1, 100)
-        // choose a random index into tokenIdsLeft, mint that ID
-        // delete that ID from tokenIdsLeft, add totalSupply() + 1 to tokenIdsLeft
     }
 
     modifier onlyTeam() {
